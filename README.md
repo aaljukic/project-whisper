@@ -11,7 +11,7 @@ HushShare, codenamed "Whisper", is an open-source, free project built with Nuxt.
 - Admin Approval: Each post requires administrator approval for publishing.
 - SSR (Server-Side Rendering): Provides better SEO optimization.
 - Mock Data: Use the init-mongo.js script to generate mock data.
-- Future updates will include mobile responsivnes + PWA, comment features and an admin dashboard.
+- Future updates will include mobile responsivness + PWA, comment features and an admin dashboard.
 
 ## Local Setup
 Follow these instructions to set up the project locally:
