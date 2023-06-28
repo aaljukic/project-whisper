@@ -1,0 +1,42 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/typescript-node
+{
+  "name": "Project Whisper Retail NuxtJS Client",
+  "build": {
+    "dockerfile": "Dockerfile"
+  },
+  "runArgs": ["-p=3000:3000"],
+  "customizations": {
+    "vscode": {
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "zsh",
+        "terminal.integrated.profiles.linux": {
+          "zsh": {
+            "path": "/bin/zsh"
+          }
+        },
+        "typescript.validate.enable": false,
+        "eslint.alwaysShowStatus": true,
+        "editor.formatOnSave": true,
+        "editor.codeActionsOnSave": {
+          "source.fixAll.eslint": true
+          // "source.organizeImports": true
+        },
+        "eslint.codeActionsOnSave.mode": "all",
+        "workbench.colorTheme": "GitHub Dark Default",
+        "typescript.suggest.autoImports": true,
+        "typescript.inlayHints.parameterNames.enabled": "all",
+        "typescript.updateImportsOnFileMove.enabled": "always"
+      },
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "ms-vscode.vscode-typescript-tslint-plugin",
+        "eamodio.gitlens",
+        "github.github-vscode-theme",
+        "pkief.material-icon-theme",
+        "Vue.volar"
+      ]
+    }
+  }
+}

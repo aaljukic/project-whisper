@@ -1,0 +1,14 @@
+version: '3.3'
+services:
+  db:
+    build:
+      context: ./db
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${DB_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${DB_PASSWORD}
+      MONGO_INITDB_DATABASE: ${DB_NAME}
+    ports:
+      - "27017:27017"
+volumes:
+  db_data: {}
