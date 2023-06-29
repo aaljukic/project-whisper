@@ -1,8 +1,9 @@
 # HushShare - The Whisper Project
-HushShare, codenamed "Whisper", is an open-source, free project built with Nuxt.js 3 and MongoDB. This project aims to provide a platform for sharing anonymous secrets, confessions, gossips, or anything else that individuals would like to express, without revealing their identity.
+HushShare, codenamed "Whisper", is an open-source, free project built with Nuxt.js 3 and MongoDB. This project aims to provide a platform for sharing anonymous secrets, confessions, gossips, or anything else that individuals would like to express, without revealing their identity. The user interaction is designed to be similar to platforms like TikTok, where only one post is visible at a time for easy and engaging scrolling.
 
 ## Features
 - Anonymity: Users can submit secrets anonymously.
+- Single-Post View: Similar to platforms like TikTok, only one post is visible at a time, enabling an easy scrolling experience.
 - Likes/Dislikes: Other users can react by liking or disliking these posts.
 - Sorting: Posts can be sorted by the newest, most liked (trending), or most disliked (controversial).
 - Local Storage: The application generates a unique UUID for each user, enabling a better user experience. 
@@ -10,7 +11,7 @@ HushShare, codenamed "Whisper", is an open-source, free project built with Nuxt.
 - Admin Approval: Each post requires administrator approval for publishing.
 - SSR (Server-Side Rendering): Provides better SEO optimization.
 - Mock Data: Use the init-mongo.js script to generate mock data.
-- Future updates will include comment features and an admin dashboard.
+- Future updates will include mobile responsivness + PWA, comment features and an admin dashboard.
 
 ## Local Setup
 Follow these instructions to set up the project locally:

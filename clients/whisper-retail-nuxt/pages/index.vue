@@ -6,7 +6,7 @@
           :isActive="confessionList !== null && confessionList.length > 0 && sortBy === 'creationDate'" />
         <WhisperSortButton @click="sortConfessions('likeCount')" class="sort-item trending" label="Trending"
           :isActive="confessionList !== null && confessionList.length > 0 && sortBy === 'likeCount'" />
-        <WhisperSortButton @click="sortConfessions('dislikeCount')" class="sort-item controverial" label="Controverial"
+        <WhisperSortButton @click="sortConfessions('dislikeCount')" class="sort-item controverial" label="Controversial"
           :isActive="confessionList !== null && confessionList.length > 0 && sortBy === 'dislikeCount'" />
       </div>
       <WhisperIconButton class="submit-new-confession" label="Confess" icon="material-symbols:edit-outline-rounded"
