@@ -1,6 +1,6 @@
 <template>
   <div class="layout">
-    <NuxtSnackbar color="$ffffff" />
+    <NuxtSnackbar />
     <WhisperHeader />
     <NuxtPage />
   </div>
@@ -42,5 +42,10 @@ onBeforeMount(async () => {
   grid-row-gap: 3rem;
   height: 100%;
   overflow: hidden;
+  position: relative;
+
+  @media (max-width: 800px) {
+    row-gap: 1rem;
+  }
 }
 </style>

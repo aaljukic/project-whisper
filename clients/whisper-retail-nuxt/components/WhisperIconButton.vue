@@ -1,5 +1,5 @@
 <template>
-  <button @click="() => click">
+  <button :disabled="isDisabled" @click="() => click">
     <Icon class="icon" :name=icon />
     {{ label }}
   </button>
@@ -10,10 +10,11 @@
 const props = defineProps({
   label: String,
   icon: String,
-  click: Function
+  click: Function,
+  isDisabled: Boolean
 });
 
-const { label, click, icon } = props;
+const { label, click, icon, isDisabled } = props;
 
 
 </script>
@@ -43,6 +44,10 @@ button {
 
   &:active {
     background-color: hsl(255, 57%, 37%);
+  }
+
+  &:disabled {
+    background-color: hsl(258, 8%, 25%);
   }
 }
 </style>

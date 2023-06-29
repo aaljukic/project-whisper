@@ -28,7 +28,7 @@ export default defineEventHandler(async (event: any) => {
     }
 
     
-    console.log("CREATING NEW LIKE...");
+    console.log("CREATING NEW LIKE...", query.anonymousUserID);
     const newLike = await Like.create({
       id: randomUUID(),
       user: query.anonymousUserID,

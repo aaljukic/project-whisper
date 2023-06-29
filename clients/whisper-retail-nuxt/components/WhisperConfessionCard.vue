@@ -1,5 +1,5 @@
 <template>
-  <div class="confession-card-row" :class="{expand: isDetails}">
+  <div class="confession-card-row" :class="{ expand: isDetails }">
     <div class="confession-card">
       <div class="card-header">
         <div class="title">
@@ -13,7 +13,8 @@
         {{ confession.content }}
       </div>
       <div v-else class="card-content">
-        {{ formatContent() }}<NuxtLink v-if="confession.content.length >= 2800" :to="confession.id" class="read-more">...Read More</NuxtLink>
+        {{ formatContent() }}<NuxtLink v-if="confession.content.length >= 2800" :to="confession.id" class="read-more">
+          ...Read More</NuxtLink>
       </div>
     </div>
     <div class="card-actions">
@@ -27,7 +28,7 @@
         <div class="label">{{ formatCount(confession.dislikeCount) }}</div>
       </div>
       <!-- todo: add comments -->
-      <div v-if="false" class="action"> 
+      <div v-if="false" class="action">
         <Icon class="icon" name="simple-line-icons:bubble" />
         <div class="label">{{ formatCount(confession.commentCount) }}</div>
       </div>
@@ -36,40 +37,24 @@
 </template>
 
 <script setup lang="ts">
-import { onBeforeMount, onMounted } from 'vue';
+import { onMounted } from 'vue';
+
+import { timeAgo } from '~/utils/utils';
 
 const props = defineProps({
   confession: Object as PropType<any>,
   isDetails: Boolean,
+  shouldPrefetchNextCard: Boolean,
+  isFirst: Boolean,
 });
-
 const { confession, isDetails } = props;
-
-import { ConfessionLikedStatus } from 'types/Post';
-import { timeAgo } from '~/utils/utils';
 
 const isLiked: Ref<Boolean> = ref(false);
 const isDisliked: Ref<Boolean> = ref(false);
+const isStatusFetched: Ref<Boolean> = ref(false);
 
-const handleLikeInitCheck = async () => {
-  let anonymousUserID: string = localStorage.getItem('anonymousUserID') ?? "";
-
-  if (!anonymousUserID) {
-    try {
-      await nextTick()
-
-      const { data } = await useFetch('/api/users', {
-        method: "POST",
-      });
-
-      const anonymousUserID: any = toRaw(data.value);
-      localStorage.setItem('anonymousUserID', anonymousUserID.id);
-    } catch (error) {
-      console.error('Error fetching anonymousUserID:', error);
-    }
-  }
-
-  anonymousUserID = localStorage.getItem('anonymousUserID') ?? "";
+const checkForLikeStatus = async () => {
+  const anonymousUserID = await getAnonymousUserID();
 
   const { data } = await useFetch(`/api/confessions/likes/${confession.id}`, {
     method: "GET",
@@ -79,34 +64,13 @@ const handleLikeInitCheck = async () => {
     }
   });
 
-  console.log(toRaw(data.value));
   if (data.value) {
-    console.log("data.value");
-    console.log(data.value);
-
     isLiked.value = true;
     isDisliked.value = false;
   }
 }
-const handleDislikeInitCheck = async () => {
-  let anonymousUserID: string = localStorage.getItem('anonymousUserID') ?? "";
-
-  if (!anonymousUserID) {
-    try {
-      await nextTick()
-
-      const { data } = await useFetch('/api/users', {
-        method: "POST",
-      });
-
-      const anonymousUserID: any = toRaw(data.value);
-      localStorage.setItem('anonymousUserID', anonymousUserID.id);
-    } catch (error) {
-      console.error('Error fetching anonymousUserID:', error);
-    }
-  }
-
-  anonymousUserID = localStorage.getItem('anonymousUserID') ?? "";
+const checkForDislikeStatus = async () => {
+  const anonymousUserID = await getAnonymousUserID();
 
   const { data } = await useFetch(`/api/confessions/dislikes/${confession.id}`, {
     method: "GET",
@@ -116,10 +80,7 @@ const handleDislikeInitCheck = async () => {
     }
   });
 
-  console.log(toRaw(data.value));
   if (data.value) {
-    console.log("data.value");
-    console.log(data.value);
     isLiked.value = false;
     isDisliked.value = true;
   }
@@ -128,25 +89,7 @@ const handleDislikeInitCheck = async () => {
 const handleLike = async () => {
   if (isLiked.value) return;
 
-  let anonymousUserID: string = localStorage.getItem('anonymousUserID') ?? "";
-
-  if (!anonymousUserID) {
-    try {
-      await nextTick()
-
-      const { data } = await useFetch('/api/users', {
-        method: "POST",
-      });
-
-      const anonymousUserID: any = toRaw(data.value);
-      localStorage.setItem('anonymousUserID', anonymousUserID.id);
-    } catch (error) {
-      console.error('Error fetching anonymousUserID:', error);
-    }
-  }
-
-  anonymousUserID = localStorage.getItem('anonymousUserID') ?? "";
-
+  const anonymousUserID = await getAnonymousUserID();
 
   const { data } = await useFetch('/api/confessions/likes', {
     method: "PATCH",
@@ -155,11 +98,12 @@ const handleLike = async () => {
       itemId: confession.id,
     }
   });
-  console.log(toRaw(data.value));
+
   if (data.value) {
     isLiked.value = true;
     isDisliked.value = false;
 
+    // todo add error handling
     const { data } = await useFetch(`/api/confessions/${confession.id}`, {
       method: "GET",
       params: {
@@ -167,39 +111,19 @@ const handleLike = async () => {
       }
     });
     const updatedConfession = toRaw(data.value);
-    console.log(updatedConfession);
 
-    setTimeout(() => {
-      confession.likeCount = updatedConfession.likeCount;
-      confession.dislikeCount = updatedConfession.dislikeCount;
-      confession.commentCount = updatedConfession.commentCount;
-    }, 1000);
+    confession.likeCount = updatedConfession.likeCount;
+    confession.dislikeCount = updatedConfession.dislikeCount;
+    confession.commentCount = updatedConfession.commentCount;
   }
 }
 
 const handleDislike = async () => {
   if (isDisliked.value) return;
 
-  let anonymousUserID: string = localStorage.getItem('anonymousUserID') ?? "";
+  const anonymousUserID = await getAnonymousUserID();
 
-  if (!anonymousUserID) {
-    try {
-      await nextTick()
-
-      const { data } = await useFetch('/api/users', {
-        method: "POST",
-      });
-
-      const anonymousUserID: any = toRaw(data.value);
-      localStorage.setItem('anonymousUserID', anonymousUserID.id);
-    } catch (error) {
-      console.error('Error fetching anonymousUserID:', error);
-    }
-  }
-
-  anonymousUserID = localStorage.getItem('anonymousUserID') ?? "";
-
-
+  // todo add error handling
   const { data } = await useFetch('/api/confessions/dislikes', {
     method: "PATCH",
     params: {
@@ -207,7 +131,7 @@ const handleDislike = async () => {
       itemId: confession.id,
     }
   });
-  console.log(toRaw(data.value));
+
   if (data.value) {
     isLiked.value = false;
     isDisliked.value = true;
@@ -219,13 +143,10 @@ const handleDislike = async () => {
       }
     });
     const updatedConfession = toRaw(data.value);
-    console.log(updatedConfession);
 
-    setTimeout(() => {
-      confession.likeCount = updatedConfession.likeCount;
-      confession.dislikeCount = updatedConfession.dislikeCount;
-      confession.commentCount = updatedConfession.commentCount;
-    }, 1000);
+    confession.likeCount = updatedConfession.likeCount;
+    confession.dislikeCount = updatedConfession.dislikeCount;
+    confession.commentCount = updatedConfession.commentCount;
   }
 }
 
@@ -244,14 +165,44 @@ const formatContent = () => {
   return confession.content;
 };
 
-onMounted(async () => {
-  // todo: fetch only for visible ones, lazy load
-  await nextTick();
-  handleLikeInitCheck();
-  handleDislikeInitCheck();
+const getAnonymousUserID = async () => {
+  let anonymousUserID: string = localStorage.getItem('anonymousUserID') ?? "";
+
+  if (!anonymousUserID) {
+    const { data } = await useFetch('/api/users', {
+      method: "POST",
+    });
+
+    const anonymousUser: any = toRaw(data.value);
+    localStorage.setItem('anonymousUserID', anonymousUser.id);
+    anonymousUserID = anonymousUser.id;
+  }
+
+  return anonymousUserID;
+}
+
+onMounted(() => {
+  if (isStatusFetched.value) {
+    return;
+  }
+
+  if (props.isFirst) {
+    checkForLikeStatus();
+    checkForDislikeStatus();
+    isStatusFetched.value = true
+  }
 });
 
-
+watch(() => props.shouldPrefetchNextCard, (newValue, oldValue) => {
+  if (isStatusFetched.value) {
+    return;
+  }
+  if (oldValue) {
+    checkForLikeStatus();
+    checkForDislikeStatus();
+    isStatusFetched.value = true
+  }
+});
 </script>
 
 <style lang="scss" scoped>
@@ -279,6 +230,10 @@ onMounted(async () => {
       justify-content: space-between;
       margin-bottom: 1rem;
 
+      @media (max-width: 800px) {
+        margin-bottom: 0.5rem;
+      }
+
       .title {
         display: flex;
         flex-direction: column;
@@ -297,6 +252,10 @@ onMounted(async () => {
           color: hsl(0, 0%, 89%);
           font-size: 1.5rem;
 
+          @media (max-width: 800px) {
+            font-size: 1rem;
+          }
+
           &:hover {
             color: rgb(117, 116, 128);
           }
@@ -311,13 +270,17 @@ onMounted(async () => {
           cursor: auto;
 
           &:hover {
-          color: hsl(0, 0%, 89%);
+            color: hsl(0, 0%, 89%);
           }
         }
 
         .card-date {
           font-style: italic;
           color: rgb(117, 116, 128);
+
+          @media (max-width: 800px) {
+            font-size: 0.9rem;
+          }
         }
       }
     }
@@ -332,6 +295,11 @@ onMounted(async () => {
       -webkit-box-orient: vertical;
       overflow: hidden;
       font-size: 1rem;
+
+      @media (max-width: 800px) {
+        -webkit-line-clamp: 12;
+        font-size: 0.8rem;
+      }
 
       .read-more {
         cursor: pointer;

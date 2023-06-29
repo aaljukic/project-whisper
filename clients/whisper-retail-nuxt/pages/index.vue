@@ -14,8 +14,10 @@
     </div>
     <div v-if="!isLoadingConfessionList && confessionList !== null && confessionList.length > 0"
       class="confession-list-scroller" ref="confessionListScroller">
-      <div v-for="(confession, index) in confessionList" :key="confession.id" class="card" ref="cards">
-        <WhisperConfessionCard :confession="confession" />
+      <div v-for="(confession, key, index) in confessionList" :key="confession.id" class="card" ref="cards"
+        :data-index="key">
+        <WhisperConfessionCard :confession="confession" :isFirst="key == 0"
+          :shouldPrefetchNextCard="currentCardIndex + 1 == key" />
       </div>
     </div>
     <div class="no-confessions" v-else-if="isLoadingConfessionList">Loading...</div>
@@ -64,7 +66,7 @@ const notifyUserAboutSuccessfulPost = () => {
 
 const sortConfessions = async (sortField: string) => {
   if (isLoadingConfessionList.value) return;
-  
+
   isLoadingConfessionList.value = true;
   const { data } = await useFetch('/api/confessions', {
     method: "GET",
@@ -80,6 +82,7 @@ const sortConfessions = async (sortField: string) => {
       // confessionListScroller.value.scrollTop = 0;
       confessionList.value = [...data.value];
       isLoadingConfessionList.value = false;
+      currentCardIndex.value = 0;
     }, 500);
   }
 }
@@ -96,14 +99,14 @@ const close = () => {
     newConfessionBottomSheet.value.close();
 
     bottomModalClearInputsHack.value = false;
-    
+
     notifyUserAboutSuccessfulPost()
     bottomModalClearInputsHack.value = true;
   }
 }
 
 const newConfess = async () => {
-   let anonymousUserID: string = localStorage.getItem('anonymousUserID') ?? "";
+  let anonymousUserID: string = localStorage.getItem('anonymousUserID') ?? "";
 
   if (!anonymousUserID) {
     try {
@@ -139,12 +142,16 @@ const newConfess = async () => {
   }
 }
 
+const currentCardIndex = ref(0);
 
 const scrollNextCardIntoView = (entries: any[]) => {
   entries.forEach((entry: { isIntersecting: any; target: { nextElementSibling: any; }; }) => {
     if (entry.isIntersecting) {
       const nextCard = entry.target.nextElementSibling;
+
       if (nextCard) {
+        currentCardIndex.value = parseInt(nextCard.getAttribute('data-index'));
+
         window.scrollTo({
           top: nextCard.offsetTop,
           behavior: 'smooth'
@@ -152,21 +159,26 @@ const scrollNextCardIntoView = (entries: any[]) => {
       }
     }
   });
-
-  onBeforeMount(async () => {
-    confessionList.value = data
-  });
-
-  onMounted(() => {
-    const observer = new IntersectionObserver(scrollNextCardIntoView, {
-      threshold: 1.0
-    });
-
-    const cards = document.querySelectorAll('.card');
-    cards.forEach((card) => observer.observe(card));
-  });
-
 };
+
+onMounted(() => {
+  const observer = new IntersectionObserver(scrollNextCardIntoView, {
+    threshold: 1.0
+  });
+
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card) => observer.observe(card));
+});
+
+onUpdated(() => {
+  const observer = new IntersectionObserver(scrollNextCardIntoView, {
+    threshold: 1.0
+  });
+
+  const cards = document.querySelectorAll('.card');
+  cards.forEach((card) => observer.observe(card));
+});
+
 
 </script>
 
@@ -187,12 +199,27 @@ const scrollNextCardIntoView = (entries: any[]) => {
     width: 800px;
     align-items: center;
 
+    @media (max-width: 800px) {
+      flex-direction: column-reverse;
+      width: 90%;
+      margin-top: 1rem;
+    }
+
     .confession-sorting {
       justify-content: center;
       display: flex;
       flex-direction: row;
       align-items: center;
       column-gap: 1rem;
+    }
+
+    .submit-new-confession {
+      @media (max-width: 800px) {
+        // quick and hacky way
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+      }
     }
   }
 

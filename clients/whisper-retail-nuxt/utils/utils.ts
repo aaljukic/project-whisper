@@ -25,3 +25,13 @@ export function timeAgo(dateParam: number | Date): string {
         return `${years} years ago`;
     }
 }
+
+export function debounce<F extends (...args: any[]) => any, T>(func: F, delay: number): (this: T, ...args: Parameters<F>) => void {
+  let debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  
+  return function(this: T, ...args: Parameters<F>) {
+    const context = this;
+    clearTimeout(debounceTimer!);
+    debounceTimer = setTimeout(() => func.apply(context, args), delay);
+  };
+}
